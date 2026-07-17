@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Manager v2.0</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+        <p>Carregando PDF Manager...</p>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" style="display: none;">
+        <div class="modal-content login-modal">
+            <div class="login-header">
+                <h1>🏢 PDF Manager</h1>
+                <p>Sistema de Gerenciamento de Documentos</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email:</label>
+                    <input type="email" id="loginEmail" required placeholder="admin@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Senha:</label>
+                    <input type="password" id="loginPassword" required placeholder="your-password">
+                </div>
+                <div id="loginError" class="error-message"></div>
+                <button type="submit" class="btn-primary btn-block">Entrar</button>
+            </form>
+            <div class="login-footer">
+                <small>Credenciais padrão: consulte ADMIN_EMAIL / ADMIN_PASSWORD no arquivo .env</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Container -->
+    <div id="appContainer" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="company-logo" aria-hidden="true">PDF</span>
+                </div>
+                <h2>PDF Manager</h2>
+                <p>PDF Metadata Manager</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-section="dashboard">
+                    📊 Dashboard
+                </button>
+                <button class="nav-btn" data-section="documents">
+                    📄 Documentos
+                </button>
+                <button class="nav-btn" data-section="upload">
+                    📤 Upload
+                </button>
+                <button class="nav-btn" id="usersNav" data-section="users" style="display: none;">
+                    👥 Usuários
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div id="userInfo" class="user-info"></div>
+                <button id="logoutBtn" class="btn-secondary btn-block">🚪 Sair</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <!-- Dashboard Section -->
+            <section id="dashboardSection" class="content-section active">
+                <header class="section-header">
+                    <h1>📊 Dashboard</h1>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📄</div>
+                        <div class="stat-info">
+                            <h3 id="totalDocs">0</h3>
+                            <p>Total de Documentos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✓</div>
+                        <div class="stat-info">
+                            <h3 id="signedDocs">0</h3>
+                            <p>Documentos Assinados</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-info">
+                            <h3 id="todayDocs">0</h3>
+                            <p>Uploads Hoje</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-info">
+                            <h3 id="signingRate">0%</h3>
+                            <p>Taxa de Assinatura</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>📈 Documentos por Dia</h3>
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>📊 Documentos por Tipo</h3>
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>✓ Status de Assinaturas</h3>
+                        <canvas id="signatureChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="recent-section">
+                    <h3>📋 Documentos Recentes</h3>
+                    <div id="recentDocuments" class="recent-documents"></div>
+                </div>
+            </section>
+
+            <!-- Documents Section -->
+            <section id="documentsSection" class="content-section">
+                <header class="section-header">
+                    <h1>📄 Gerenciar Documentos</h1>
+                    <div class="header-actions">
+                        <input type="text" id="searchInput" placeholder="Buscar documentos..." 
+                               onkeyup="if(event.key==='Enter') loadDocuments(1)">
+                        <select id="typeFilter" onchange="loadDocuments(1)">
+                            <option value="">Todos os tipos</option>
+                            <option value="contrato">Contrato</option>
+                            <option value="ata">Ata</option>
+                            <option value="relatorio">Relatório</option>
+                            <option value="nota_fiscal">Nota Fiscal</option>
+                            <option value="prontuario">Prontuário</option>
+                        </select>
+                        <button class="btn-primary" onclick="loadDocuments(1)">🔍 Buscar</button>
+                    </div>
+                </header>
+
+                <!-- Batch Actions Bar -->
+                <div id="batchActionsBar" class="batch-actions-bar" style="display: none;">
+                    <span class="batch-info">
+                        <strong><span id="selectedCount">0</span> documentos selecionados</strong>
+                    </span>
+                    <div class="batch-buttons">
+                        <button class="btn-primary" id="batchMetadataBtn">
+                            📝 Adicionar Metadados
+                        </button>
+                        <button class="btn-danger" id="batchDeleteBtn">
+                            🗑️ Deletar Selecionados
+                        </button>
+                        <button class="btn-secondary" onclick="clearSelection()">
+                            ✖ Cancelar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Documents Table -->
+                <div class="table-container">
+                    <table class="documents-table">
+                        <thead>
+                            <tr>
+                                <th width="40">
+                                    <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll()">
+                                </th>
+                                <th width="60">ID</th>
+                                <th>Título / Arquivo</th>
+                                <th>Autor</th>
+                                <th>Tipo</th>
+                                <th width="100">Tamanho</th>
+                                <th width="120">Status</th>
+                                <th width="150">Data Upload</th>
+                                <th width="150">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="documentsTableBody">
+                            <tr>
+                                <td colspan="9" class="loading-state">
+                                    <div class="spinner"></div> Carregando documentos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="pagination" class="pagination"></div>
+            </section>
+
+            <!-- Upload Section -->
+            <section id="uploadSection" class="content-section">
+                <header class="section-header">
+                    <h1>📤 Upload de PDFs</h1>
+                </header>
+
+                <div class="upload-container">
+                    <div id="dropZone" class="drop-zone">
+                        <div class="drop-zone-icon">📁</div>
+                        <h3>Arraste e solte PDFs aqui</h3>
+                        <p>ou clique para selecionar arquivos</p>
+                        <input type="file" id="fileInput" multiple accept=".pdf" hidden>
+                        <button class="btn-secondary" onclick="document.getElementById('fileInput').click()">
+                            Selecionar Arquivos
+                        </button>
+                        <p class="upload-info">Máximo: 50MB por arquivo</p>
+                    </div>
+
+                    <div id="fileList" class="file-list">
+                        <p class="empty-state">Nenhum arquivo selecionado</p>
+                    </div>
+
+                    <div class="upload-actions">
+                        <button id="uploadBtn" class="btn-primary btn-lg" disabled>
+                            📤 Enviar PDFs
+                        </button>
+                        <button id="clearBtn" class="btn-secondary">
+                            🗑️ Limpar Lista
+                        </button>
+                    </div>
+
+                    <div id="uploadResults" class="upload-results" style="display: none;"></div>
+                </div>
+            </section>
+
+            <!-- Users Section (Admin Only) -->
+            <section id="usersSection" class="content-section">
+                <header class="section-header">
+                    <h1>👥 Gerenciar Usuários</h1>
+                    <button class="btn-primary" onclick="openCreateUserModal()">
+                        ➕ Novo Usuário
+                    </button>
+                </header>
+
+                <div class="table-container">
+                    <table class="documents-table">
+                        <thead>
+                            <tr>
+                                <th width="60">ID</th>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th width="120">Role</th>
+                                <th width="100">Status</th>
+                                <th width="120">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="6" class="loading-state">
+                                    <div class="spinner"></div> Carregando usuários...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ========== MODAL: Batch Metadata ========== -->
+    <div id="batchMetadataModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Adicionar Metadados em Lote</h2>
+                <button class="modal-close" onclick="closeBatchModal()">✖</button>
+            </div>
+
+            <p class="modal-info">
+                <strong><span id="batchDocCount">0</span> documentos selecionados</strong>
+            </p>
+
+            <form id="batchMetadataForm" onsubmit="submitBatchMetadata(event)">
+                <div class="form-group">
+                    <label for="batchAuthor">Autor:</label>
+                    <input type="text" id="batchAuthor" maxlength="255" 
+                           placeholder="Ex: Dr. João Silva">
+                </div>
+
+                <div class="form-group">
+                    <label for="batchSubject">Assunto:</label>
+                    <input type="text" id="batchSubject" maxlength="500" 
+                           placeholder="Ex: Contratos de Prestação de Serviços 2025">
+                </div>
+
+                <div class="form-group">
+                    <label for="batchDocType">Tipo de Documento:</label>
+                    <select id="batchDocType">
+                        <option value="">Selecione...</option>
+                        <option value="contrato">Contrato</option>
+                        <option value="ata">Ata de Reunião</option>
+                        <option value="relatorio">Relatório</option>
+                        <option value="nota_fiscal">Nota Fiscal</option>
+                        <option value="estatuto">Estatuto</option>
+                        <option value="regimento">Regimento Interno</option>
+                        <option value="convenio">Convênio</option>
+                        <option value="prontuario">Prontuário</option>
+                        <option value="receita">Receita Médica</option>
+                        <option value="atestado">Atestado</option>
+                        <option value="exame">Exame</option>
+                        <option value="laudo">Laudo</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="batchKeywords">Palavras-chave (separadas por vírgula):</label>
+                    <input type="text" id="batchKeywords" maxlength="500" 
+                           placeholder="Ex: contrato, 2025, prestação, serviços">
+                    <small>Separe as palavras-chave por vírgula</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary btn-lg">
+                        ⚡ Processar em Lote
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="closeBatchModal()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+
+            <!-- Progress Bar -->
+            <div id="batchProgress" class="batch-progress" style="display: none;">
+                <div class="progress-bar-container">
+                    <div id="batchProgressBar" class="progress-bar-fill" style="width: 0%"></div>
+                </div>
+                <p id="batchProgressText" class="progress-text">Processando...</p>
+            </div>
+
+            <!-- Results -->
+            <div id="batchResults" class="batch-results" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: Document Details ========== -->
+    <div id="documentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📄 Detalhes do Documento</h2>
+                <button class="modal-close" onclick="closeDocumentModal()">✖</button>
+            </div>
+            <div id="documentModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+
+    <script>
+        // ✅ Função auxiliar para limpar seleção
+        function clearSelection() {
+            selectedDocuments.clear();
+            document.querySelectorAll('.doc-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('selectAllCheckbox').checked = false;
+            updateBatchActionsBar();
+        }
+    </script>
+</body>
+</html>
