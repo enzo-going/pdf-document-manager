@@ -1,0 +1,64 @@
+# ==== Segredos / variáveis de ambiente ====
+.env
+.env.*
+!.env.example
+
+# ==== Banco de dados / instância ====
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# ==== Certificados e chaves privadas ====
+certs/
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+
+# ==== Armazenamento de arquivos enviados (dados reais) ====
+backend/storage/temp/*
+backend/storage/originals/*
+backend/storage/processed/*
+!backend/storage/**/.gitkeep
+
+# ==== Identidade visual da organização (não versionar) ====
+frontend/assets/*-logo.*
+
+# ==== Logs ====
+*.log
+logs/
+
+# ==== Python ====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ==== Ambientes virtuais ====
+venv/
+.venv/
+env/
+ENV/
+
+# ==== Node / build ====
+node_modules/
+dist/
+build/
+
+# ==== Ferramentas locais de desenvolvimento ====
+.claude/
+CLAUDE.md
+.vscode/
+.idea/
+
+# ==== Sistema operacional / temporários ====
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
