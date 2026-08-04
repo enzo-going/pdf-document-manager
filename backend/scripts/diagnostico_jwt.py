@@ -1,18 +1,28 @@
 """
 Script de diagnóstico do JWT
+
+Uso: a partir de backend/, `python scripts/diagnostico_jwt.py`
 """
+
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from flask_jwt_extended import decode_token
 
 from app import create_app
 from app.models import User
-from flask_jwt_extended import decode_token
-import json
 
 app = create_app()
+admin_email = app.config['ADMIN_EMAIL']
+admin_password = app.config['ADMIN_PASSWORD']
 
 with app.app_context():
     # 1. Buscar usuário admin
-    user = User.query.filter_by(email='admin@example.com').first()
-    
+    user = User.query.filter_by(email=admin_email).first()
+
     if not user:
         print("❌ Usuário não encontrado!")
         exit(1)
@@ -55,13 +65,11 @@ with app.app_context():
     
     # 4. Testar a rota /me internamente
     print("\n🧪 Testando rota /me internamente...")
-    from flask import g
-    from flask_jwt_extended import create_access_token, get_jwt_identity
-    
+
     with app.test_client() as client:
-        # Fazer login
-        response = client.post('/api/auth/login', 
-                              json={'email': 'admin@example.com', 'password': 'change-me-in-production'},
+        # Fazer login com as credenciais de admin do .env
+        response = client.post('/api/auth/login',
+                              json={'email': admin_email, 'password': admin_password},
                               headers={'Content-Type': 'application/json'})
         
         print(f"   Login status: {response.status_code}")

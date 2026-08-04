@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """
-Teste simples para verificar se tudo funciona
+Diagnostico de imports: confere dependencias, modelos, blueprints e rotas.
+
+Uso: a partir de backend/, `python scripts/diagnostico_imports.py`
 """
 
 import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from dotenv import load_dotenv
 
 # Carregar .env
