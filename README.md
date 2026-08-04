@@ -27,6 +27,7 @@ digital (DocuSign).
 │   │   ├── config.py    # Configuração via variáveis de ambiente
 │   │   └── __init__.py  # Application factory
 │   ├── tests/           # Testes automatizados (pytest)
+│   ├── scripts/         # Diagnósticos manuais (não são testes)
 │   ├── requirements.txt
 │   └── run.py           # Ponto de entrada
 └── frontend/            # Interface estática (HTML/CSS/JS)
@@ -84,22 +85,33 @@ A API sobe em `http://localhost:5000`. Abra `frontend/index.html` no navegador
 
 ```bash
 cd backend
-pytest tests/ -v
+pytest -v
 ```
 
-Cobertura dos testes:
+18 testes, cobrindo o módulo de autenticação:
 
-- Autenticação e autorização
-- Fluxos de documentos e metadados
-- Validações de entrada
-- Controle de papéis
+- Login: sucesso, email inexistente, senha errada, campos faltando, conta desativada
+- `GET /api/auth/me` com token válido, sem token e com token inválido
+- Gestão de usuários: criação por admin, bloqueio para usuário comum, email
+  duplicado, listagem e controle de papéis
+- Renovação de token (e recusa de access token na rota de refresh), logout
+- Troca de senha: sucesso (senha antiga deixa de valer) e senha atual errada
+
+Documentos, metadados e analytics ainda **não** têm testes automatizados.
+
+Em `backend/scripts/` ficam dois diagnósticos manuais (imports/rotas e JWT), que
+o pytest não coleta — veja [`backend/scripts/README.md`](backend/scripts/README.md).
 
 ## Endpoints principais
 
 ```http
 POST /api/auth/login            # Login com email/senha
-POST /api/auth/refresh          # Renovar token
-GET  /api/auth/profile          # Dados do usuário atual
+POST /api/auth/refresh          # Renovar token (usa o refresh_token)
+GET  /api/auth/me               # Dados do usuário atual
+POST /api/auth/logout
+POST /api/auth/change-password
+GET  /api/auth/users            # Listar usuários (admin)
+POST /api/auth/users            # Criar usuário (admin)
 
 POST /api/documents/upload      # Upload de PDFs
 GET  /api/documents             # Listar documentos
