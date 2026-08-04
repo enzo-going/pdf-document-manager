@@ -46,12 +46,15 @@ def create_app(config_name='development'):
         except Exception as e:
             app.logger.error(f"❌ Erro ao criar tabelas: {e}")
     
-    # Criar admin em contexto separado APÓS confirmar que tabelas existem
-    with app.app_context():
-        try:
-            create_default_admin()
-        except Exception as e:
-            app.logger.error(f"❌ Erro ao criar admin padrão: {e}")
+    # Criar admin em contexto separado APÓS confirmar que tabelas existem.
+    # Em testes (CREATE_ADMIN_ON_STARTUP=False) o admin não é criado: as
+    # fixtures montam os usuários que cada teste precisa.
+    if app.config.get('CREATE_ADMIN_ON_STARTUP', True):
+        with app.app_context():
+            try:
+                create_default_admin()
+            except Exception as e:
+                app.logger.error(f"❌ Erro ao criar admin padrão: {e}")
     
     # Registrar blueprints
     try:

@@ -128,7 +128,9 @@ class AuditLog(db.Model):
     __tablename__ = 'audit_logs'
     
     id = db.Column(db.Integer, primary_key=True)
-    document_id = db.Column(db.Integer, db.ForeignKey('documents.id'), nullable=False)
+    # Nem toda ação auditada é sobre um documento: criação de usuário, login e
+    # mudança de senha entram aqui sem document_id.
+    document_id = db.Column(db.Integer, db.ForeignKey('documents.id'), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     action = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
