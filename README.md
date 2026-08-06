@@ -21,8 +21,7 @@ digital (DocuSign).
 .
 ├── backend/
 │   ├── app/
-│   │   ├── auth/        # Autenticação JWT
-│   │   ├── routes/      # Endpoints da API
+│   │   ├── routes/      # Endpoints da API (auth, documentos, analytics)
 │   │   ├── services/    # Regras de negócio (PDF, metadados, lote)
 │   │   ├── utils/       # Validadores e helpers
 │   │   ├── models.py    # Modelos do banco
