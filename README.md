@@ -1,5 +1,7 @@
 # PDF Document Manager
 
+[![tests](https://github.com/enzo-going/pdf-document-manager/actions/workflows/tests.yml/badge.svg)](https://github.com/enzo-going/pdf-document-manager/actions/workflows/tests.yml)
+
 Sistema web para gerenciamento de documentos PDF com autenticação JWT,
 adição de metadados, painel de analytics e integração opcional de assinatura
 digital (DocuSign).
