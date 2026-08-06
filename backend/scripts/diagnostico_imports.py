@@ -56,9 +56,8 @@ except Exception as e:
 
 print("\n3. Testando blueprints...")
 try:
-    from app.auth import auth_bp
+    from app.routes.auth import auth_bp
     print(f"✅ Auth Blueprint: {auth_bp.name}")
-    print(f"✅ Auth Rules: {len(auth_bp.url_map._rules_by_endpoint)} endpoints")
 except Exception as e:
     print(f"❌ Auth Blueprint: {e}")
 
