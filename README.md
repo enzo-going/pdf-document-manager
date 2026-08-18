@@ -3,8 +3,7 @@
 [![tests](https://github.com/enzo-going/pdf-document-manager/actions/workflows/tests.yml/badge.svg)](https://github.com/enzo-going/pdf-document-manager/actions/workflows/tests.yml)
 
 Sistema web para gerenciamento de documentos PDF com autenticação JWT,
-adição de metadados, painel de analytics e integração opcional de assinatura
-digital (DocuSign).
+adição de metadados e painel de analytics.
 
 ## Funcionalidades
 
@@ -13,7 +12,9 @@ digital (DocuSign).
 - Gestão de metadados do documento
 - Dashboard com métricas e gráficos
 - Registro de auditoria das ações
-- Integração opcional com DocuSign para assinatura
+
+> Assinatura digital ainda **não** está implementada. A configuração reserva as
+> variáveis de um provedor externo, mas não há código de integração no projeto.
 
 ## Arquitetura
 
@@ -67,7 +68,7 @@ Edite `backend/.env` com os seus próprios valores. As chaves principais:
 | `DATABASE_URL` | URL do banco (SQLite por padrão) |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Admin criado no primeiro start |
 | `COMPANY_NAME` / `DEFAULT_LOCATION` | Rótulos exibidos na aplicação |
-| `DOCUSIGN_*` | Credenciais DocuSign (opcional) |
+| `DOCUSIGN_*` | Reservadas para assinatura digital; sem uso hoje |
 
 O primeiro administrador é criado automaticamente a partir de `ADMIN_EMAIL` e
 `ADMIN_PASSWORD`. Defina uma senha forte antes de subir a aplicação.
