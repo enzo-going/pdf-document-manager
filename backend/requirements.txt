@@ -4,7 +4,7 @@ Flask-SQLAlchemy==3.1.1
 Flask-JWT-Extended==4.7.4
 Flask-Bcrypt==1.0.1
 Werkzeug==3.1.8
-pypdf==6.16.1
+pypdf==6.18.1
 python-dotenv==1.2.3
 gunicorn==26.1.0
 pytest==9.1.1
