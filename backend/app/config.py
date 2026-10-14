@@ -93,6 +93,23 @@ class TestingConfig(Config):
     CREATE_ADMIN_ON_STARTUP = False
 
 
+ENDERECOS_LOCAIS = frozenset({'127.0.0.1', 'localhost', '::1'})
+
+
+def opcoes_servidor_dev(env=None):
+    """Host, porta e debug do `python run.py`.
+
+    Por padrão escuta só nesta máquina. O depurador do Werkzeug (ligado com
+    FLASK_ENV=development) executa código Python pelo navegador: com HOST
+    apontando para a rede, ele fica desligado em vez de ficar exposto.
+    """
+    env = os.environ if env is None else env
+    host = env.get('HOST', '127.0.0.1')
+    port = int(env.get('PORT', 5000))
+    debug = env.get('FLASK_ENV') == 'development' and host in ENDERECOS_LOCAIS
+    return host, port, debug
+
+
 # Configuração baseada no ambiente
 config = {
     'development': DevelopmentConfig,

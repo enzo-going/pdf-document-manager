@@ -92,6 +92,11 @@ python run.py
 A API sobe em `http://localhost:5000`. Abra `frontend/index.html` no navegador
 (ou sirva a pasta `frontend/` com um servidor estático) para usar a interface.
 
+O `run.py` escuta só nesta máquina (`127.0.0.1`). Para abrir na rede, defina
+`HOST=0.0.0.0`; nesse caso o depurador do Werkzeug fica desligado mesmo com
+`FLASK_ENV=development`, porque ele executa código pelo navegador. Em produção,
+use um servidor WSGI como o `gunicorn`, que já está nas dependências.
+
 ## Testes
 
 ```bash

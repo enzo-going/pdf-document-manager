@@ -6,7 +6,7 @@ e rota de debug.
 import pytest
 
 from app import create_app
-from app.config import ProductionConfig, TestingConfig
+from app.config import ProductionConfig, TestingConfig, opcoes_servidor_dev
 
 
 def _producao(monkeypatch, **valores):
@@ -98,3 +98,20 @@ class TestRotaDeDebug:
         resposta = client.get('/debug/routes')
         assert resposta.status_code == 200
         assert any(rota['path'] == '/api/auth/login' for rota in resposta.get_json())
+
+
+class TestServidorDev:
+    """python run.py: só nesta máquina por padrão, sem depurador exposto na rede."""
+
+    def test_padrao_escuta_so_nesta_maquina(self):
+        assert opcoes_servidor_dev({}) == ('127.0.0.1', 5000, False)
+
+    def test_depurador_so_liga_escutando_localmente(self):
+        assert opcoes_servidor_dev({'FLASK_ENV': 'development'}) == ('127.0.0.1', 5000, True)
+        assert opcoes_servidor_dev({'FLASK_ENV': 'development', 'HOST': 'localhost'})[2] is True
+
+    def test_na_rede_o_depurador_fica_desligado(self):
+        assert opcoes_servidor_dev({'FLASK_ENV': 'development', 'HOST': '0.0.0.0'}) == ('0.0.0.0', 5000, False)
+
+    def test_porta_vem_do_ambiente(self):
+        assert opcoes_servidor_dev({'PORT': '8080'})[1] == 8080
