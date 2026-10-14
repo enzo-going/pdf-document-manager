@@ -64,14 +64,23 @@ Edite `backend/.env` com os seus próprios valores. As chaves principais:
 
 | Variável | Descrição |
 |----------|-----------|
+| `FLASK_ENV` | `development` (padrão), `production` ou `testing` |
 | `SECRET_KEY` / `JWT_SECRET_KEY` | Chaves de sessão e JWT |
 | `DATABASE_URL` | URL do banco (SQLite por padrão) |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Admin criado no primeiro start |
 | `COMPANY_NAME` / `DEFAULT_LOCATION` | Rótulos exibidos na aplicação |
+| `CORS_ORIGINS` | Origens que podem chamar a API, separadas por vírgula (`*` libera todas, o padrão) |
 | `DOCUSIGN_*` | Reservadas para assinatura digital; sem uso hoje |
 
 O primeiro administrador é criado automaticamente a partir de `ADMIN_EMAIL` e
 `ADMIN_PASSWORD`. Defina uma senha forte antes de subir a aplicação.
+
+Com `FLASK_ENV=production` a aplicação **se recusa a subir** se `SECRET_KEY`,
+`JWT_SECRET_KEY` ou `ADMIN_PASSWORD` ainda estiverem com um valor de exemplo
+(`change-me` e os padrões do código): esses valores estão publicados e permitem
+forjar o token de qualquer usuário. Em produção, `/debug/routes` também não existe.
+Se restringir o `CORS_ORIGINS`, sirva o `frontend/` por HTTP: aberto direto do
+disco, o navegador manda a origem `null`.
 
 ## Execução
 

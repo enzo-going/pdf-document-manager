@@ -5,24 +5,35 @@ Factory da aplicação Flask
 import os
 from flask import Flask, jsonify, current_app
 from app.extensions import db, bcrypt, jwt, cors
-from app.config import config
+from app.config import config, PLACEHOLDER_SECRETS
 
 
-def create_app(config_name='development'):
-    """Factory para criar a aplicação Flask"""
-    
+def create_app(config_name=None):
+    """Factory para criar a aplicação Flask
+
+    Sem `config_name`, usa a variável FLASK_ENV (a mesma do .env) e cai em
+    desenvolvimento quando ela não está definida.
+    """
+    if config_name is None:
+        config_name = os.getenv('FLASK_ENV', 'development')
+    if config_name not in config:
+        raise ValueError(
+            f"Ambiente '{config_name}' desconhecido. Use um destes: {', '.join(sorted(config))}"
+        )
+
     app = Flask(__name__)
-    
+
     # Carregar configuração
     app.config.from_object(config[config_name])
-    
+    _check_secrets(app, config_name)
+
     # Inicializar extensões
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
     cors.init_app(app, resources={
         r"/api/*": {
-            "origins": "*",
+            "origins": _cors_origins(app.config.get('CORS_ORIGINS', '*')),
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"]
         }
@@ -79,18 +90,19 @@ def create_app(config_name='development'):
         app.logger.warning(f"⚠️ Erro ao importar rotas de autenticação: {e}")
     
     
-    @app.route('/debug/routes')
-    def list_routes():
-        """Lista todas as rotas disponíveis (apenas para debug)"""
-        routes = []
-        for rule in app.url_map.iter_rules():
-            methods = ', '.join(sorted(rule.methods - {'HEAD', 'OPTIONS'}))
-            routes.append({
-                'endpoint': rule.endpoint,
-                'methods': methods,
-                'path': rule.rule
-            })
-        return jsonify(sorted(routes, key=lambda x: x['path'])), 200
+    if app.debug:
+        @app.route('/debug/routes')
+        def list_routes():
+            """Lista todas as rotas disponíveis (só existe em modo debug)"""
+            routes = []
+            for rule in app.url_map.iter_rules():
+                methods = ', '.join(sorted(rule.methods - {'HEAD', 'OPTIONS'}))
+                routes.append({
+                    'endpoint': rule.endpoint,
+                    'methods': methods,
+                    'path': rule.rule
+                })
+            return jsonify(sorted(routes, key=lambda x: x['path'])), 200
     
     # Rota de teste
     @app.route('/')
@@ -109,6 +121,30 @@ def create_app(config_name='development'):
         return {'status': 'healthy', 'database': 'connected'}, 200
     
     return app
+
+
+def _check_secrets(app, config_name):
+    """Em produção, recusa subir com segredo de exemplo; nos outros ambientes, só avisa."""
+    keys = ['SECRET_KEY', 'JWT_SECRET_KEY']
+    if app.config.get('CREATE_ADMIN_ON_STARTUP', True):
+        keys.append('ADMIN_PASSWORD')
+    weak = [key for key in keys if app.config.get(key, '') in PLACEHOLDER_SECRETS]
+    if not weak:
+        return
+    if config_name == 'production':
+        raise RuntimeError(
+            f"Defina valores próprios para {', '.join(weak)} no .env antes de subir em produção: "
+            "os valores de exemplo são públicos e permitem forjar tokens de qualquer usuário."
+        )
+    app.logger.warning(f"⚠️ Usando valor de exemplo em {', '.join(weak)} (aceito fora de produção)")
+
+
+def _cors_origins(raw):
+    """'*' libera todas as origens; senão, lista separada por vírgula."""
+    origins = [origin.strip() for origin in raw.split(',') if origin.strip()]
+    if not origins or '*' in origins:
+        return '*'
+    return origins
 
 
 def create_default_admin():
