@@ -11,24 +11,26 @@ def admin_required(f):
     """Decorator para restringir acesso apenas a administradores"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # Só a consulta do usuário fica no try: um erro dentro da rota não é
+        # erro de autorização e não pode ser respondido como se fosse.
         try:
             current_user_id = get_jwt_identity()
             user = User.query.get(current_user_id)
-            
-            if not user or user.role != UserRole.ADMIN:
-                return jsonify({
-                    'success': False,
-                    'message': 'Acesso negado. Apenas administradores podem executar esta ação.'
-                }), 403
-            
-            return f(*args, **kwargs)
         except Exception as e:
             current_app.logger.error(f"admin_required decorator error: {str(e)}")
             return jsonify({
                 'success': False,
                 'message': 'Erro interno de autorização'
             }), 500
-    
+
+        if not user or user.role != UserRole.ADMIN:
+            return jsonify({
+                'success': False,
+                'message': 'Acesso negado. Apenas administradores podem executar esta ação.'
+            }), 403
+
+        return f(*args, **kwargs)
+
     return decorated_function
 
 def user_required(f):
@@ -38,20 +40,20 @@ def user_required(f):
         try:
             current_user_id = get_jwt_identity()
             user = User.query.get(current_user_id)
-            
-            if not user or user.role == UserRole.VIEWER:
-                return jsonify({
-                    'success': False,
-                    'message': 'Acesso negado. Permissão de usuário necessária.'
-                }), 403
-            
-            return f(*args, **kwargs)
         except Exception as e:
             current_app.logger.error(f"user_required decorator error: {str(e)}")
             return jsonify({
                 'success': False,
                 'message': 'Erro interno de autorização'
             }), 500
+
+        if not user or user.role == UserRole.VIEWER:
+            return jsonify({
+                'success': False,
+                'message': 'Acesso negado. Permissão de usuário necessária.'
+            }), 403
+
+        return f(*args, **kwargs)
     
     return decorated_function
 
@@ -63,20 +65,20 @@ def permission_required(permission):
             try:
                 current_user_id = get_jwt_identity()
                 user = User.query.get(current_user_id)
-                
-                if not user or not user.has_permission(permission):
-                    return jsonify({
-                        'success': False,
-                        'message': f'Acesso negado. Permissão "{permission}" necessária.'
-                    }), 403
-                
-                return f(*args, **kwargs)
             except Exception as e:
                 current_app.logger.error(f"permission_required decorator error: {str(e)}")
                 return jsonify({
                     'success': False,
                     'message': 'Erro interno de autorização'
                 }), 500
+
+            if not user or not user.has_permission(permission):
+                return jsonify({
+                    'success': False,
+                    'message': f'Acesso negado. Permissão "{permission}" necessária.'
+                }), 403
+
+            return f(*args, **kwargs)
         
         return decorated_function
     return decorator
