@@ -301,6 +301,7 @@ function initializeApp() {
     if (loginModal) loginModal.style.display = 'none';
     if (appContainer) appContainer.style.display = 'block';
 
+    if (typeof setupApp === 'function') setupApp();
     updateUserInfo();
     
     // Carregar dashboard se a função existir

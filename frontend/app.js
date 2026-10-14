@@ -17,22 +17,19 @@ let selectedFiles = []; // Arquivos para upload
 // INICIALIZAÇÃO
 // =============================================================================
 
-document.addEventListener('DOMContentLoaded', function () {
-    // Verificar autenticação
-    if (!auth.isAuthenticated()) {
-        showLoginModal();
-        return;
-    }
-
+// Liga menu, modais, upload e ações em lote uma única vez. É chamado por
+// initializeApp (auth.js) tanto quando a página abre já logada quanto depois do
+// login pela tela: antes só o primeiro caso ligava o menu, e quem entrava pelo
+// formulário ficava com os botões sem resposta até recarregar a página.
+let appConfigurado = false;
+function setupApp() {
+    if (appConfigurado) return;
+    appConfigurado = true;
     setupNavigation();
     setupModals();
     setupUploadSystem();
     setupBatchActions();
-    updateUserInfo();
-    
-    // Carregar dashboard inicial
-    loadDashboard();
-});
+}
 
 
 // =============================================================================
