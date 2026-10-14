@@ -166,11 +166,13 @@ class BatchProcessor:
                 
                 db.session.flush()
                 
-                # ✅ CORREÇÃO: Log de auditoria SEM metadata_changes
+                # Auditoria registra de onde para onde cada campo mudou (o valor
+                # final, já normalizado); campo reenviado igual não entra.
                 changes = []
                 for key in ['title', 'author', 'subject', 'doc_type', 'keywords']:
-                    if key in metadata and metadata[key]:
-                        changes.append(f"{key}: '{metadata[key]}'")
+                    antes, depois = old_metadata[key], getattr(document, key)
+                    if antes != depois:
+                        changes.append(f"{key}: '{antes or ''}' → '{depois or ''}'")
                 
                 audit = AuditLog(
                     document_id=document.id,
