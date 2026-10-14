@@ -53,6 +53,20 @@ class Config:
     ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@example.com')
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'change-me-in-production')
 
+    # CORS: origens permitidas, separadas por vírgula ("*" libera todas)
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', '*')
+
+
+# Valores de exemplo que nunca podem chegar em produção: estão neste
+# repositório público e no .env.example, então qualquer pessoa os conhece.
+PLACEHOLDER_SECRETS = frozenset({
+    '',
+    'change-me',
+    'change-me-in-production',
+    'dev-secret-key-change-in-production',
+    'jwt-secret-key-change-in-production',
+})
+
 
 class DevelopmentConfig(Config):
     """Configuração de desenvolvimento"""
