@@ -1,0 +1,8 @@
+# Só regras que apontam erro de verdade (nome indefinido, import ou variável
+# sem uso, sintaxe); regras de estilo ficam de fora de propósito.
+[lint]
+select = ["F", "E9"]
+
+[lint.per-file-ignores]
+# O script existe justamente para testar se cada import funciona.
+"scripts/diagnostico_imports.py" = ["F401"]

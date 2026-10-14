@@ -6,9 +6,8 @@ import os
 import hashlib
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Tuple
 from pypdf import PdfReader, PdfWriter
-import pypdf
 from flask import current_app
 
 class PDFService:
@@ -69,7 +68,7 @@ class PDFService:
             with open(file_path, 'rb') as file:
                 reader = PdfReader(file)
                 return len(reader.pages)
-        except Exception as e:
+        except Exception:
             return 0
     
     def extract_metadata(self, file_path: str) -> dict:

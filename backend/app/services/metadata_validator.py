@@ -6,8 +6,7 @@ Implementa validações conforme:
 - Boas práticas de digitalização para empresas privadas
 """
 import re
-from typing import Dict, List, Optional
-from datetime import datetime
+from typing import Dict, Optional
 
 class MetadataValidator:
     """Validador de metadados seguindo padrões brasileiros"""
