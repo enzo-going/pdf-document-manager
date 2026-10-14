@@ -130,8 +130,8 @@ function updateRecentDocuments(documents) {
         <div class="recent-doc-item">
             <div class="doc-icon">📄</div>
             <div class="doc-info">
-                <strong>${doc.title || doc.original_filename}</strong>
-                <small>${doc.author || 'Sem autor'} • ${formatDate(doc.uploaded_at)}</small>
+                <strong>${escapeHtml(doc.title || doc.original_filename)}</strong>
+                <small>${escapeHtml(doc.author || 'Sem autor')} • ${formatDate(doc.uploaded_at)}</small>
             </div>
             <span class="doc-badge ${doc.is_signed ? 'signed' : 'unsigned'}">
                 ${doc.is_signed ? '✓ Assinado' : '⋯ Pendente'}
@@ -433,7 +433,7 @@ function updateFileList() {
             <div class="file-item ${isTooBig ? 'file-error' : ''}">
                 <div class="file-icon">📄</div>
                 <div class="file-info">
-                    <strong>${file.name}</strong>
+                    <strong>${escapeHtml(file.name)}</strong>
                     <small class="${sizeClass}">
                         ${formatFileSize(file.size)} 
                         ${isTooBig ? '⚠️ Muito grande (máx 50MB)' : ''}
@@ -541,10 +541,10 @@ function showUploadResults(results) {
             <div class="result-item ${result.success ? 'success' : 'error'}">
                 <span class="result-icon">${result.success ? '✓' : '✗'}</span>
                 <div class="result-info">
-                    <strong>${result.filename}</strong>
+                    <strong>${escapeHtml(result.filename)}</strong>
                     ${result.success 
                         ? `<small>ID: ${result.document_id} | ${formatFileSize(result.size)} | ${result.pages} páginas</small>` 
-                        : `<small class="error-text">${result.error}</small>`
+                        : `<small class="error-text">${escapeHtml(result.error)}</small>`
                     }
                 </div>
             </div>
@@ -619,11 +619,11 @@ function renderDocuments(documents) {
             </td>
             <td>${doc.id}</td>
             <td>
-                <strong>${doc.title || doc.original_filename}</strong>
-                <br><small>${doc.original_filename}</small>
+                <strong>${escapeHtml(doc.title || doc.original_filename)}</strong>
+                <br><small>${escapeHtml(doc.original_filename)}</small>
             </td>
-            <td>${doc.author || '-'}</td>
-            <td>${doc.doc_type || '-'}</td>
+            <td>${escapeHtml(doc.author || '-')}</td>
+            <td>${escapeHtml(doc.doc_type || '-')}</td>
             <td>${formatFileSize(doc.file_size)}</td>
             <td>
                 <span class="badge ${doc.is_signed ? 'badge-success' : 'badge-secondary'}">
@@ -921,7 +921,7 @@ function showBatchResults(status, result) {
         resultsDiv.innerHTML = `
             <div class="error-message">
                 ❌ Erro no processamento
-                <p>${result.error || 'Erro desconhecido'}</p>
+                <p>${escapeHtml(result.error || 'Erro desconhecido')}</p>
             </div>
             <button class="btn-secondary" onclick="closeBatchModal()">
                 Fechar
@@ -1129,27 +1129,27 @@ function showDocumentModal(doc) {  // ✅ Mudou de 'document' para 'doc'
             </div>
             <div class="detail-row">
                 <strong>Título:</strong>
-                <span>${doc.title || '-'}</span>
+                <span>${escapeHtml(doc.title || '-')}</span>
             </div>
             <div class="detail-row">
                 <strong>Arquivo Original:</strong>
-                <span>${doc.original_filename}</span>
+                <span>${escapeHtml(doc.original_filename)}</span>
             </div>
             <div class="detail-row">
                 <strong>Autor:</strong>
-                <span>${doc.author || '-'}</span>
+                <span>${escapeHtml(doc.author || '-')}</span>
             </div>
             <div class="detail-row">
                 <strong>Assunto:</strong>
-                <span>${doc.subject || '-'}</span>
+                <span>${escapeHtml(doc.subject || '-')}</span>
             </div>
             <div class="detail-row">
                 <strong>Tipo:</strong>
-                <span>${doc.doc_type || '-'}</span>
+                <span>${escapeHtml(doc.doc_type || '-')}</span>
             </div>
             <div class="detail-row">
                 <strong>Palavras-chave:</strong>
-                <span>${doc.keywords || '-'}</span>
+                <span>${escapeHtml(doc.keywords || '-')}</span>
             </div>
             <div class="detail-row">
                 <strong>Tamanho:</strong>
@@ -1157,7 +1157,7 @@ function showDocumentModal(doc) {  // ✅ Mudou de 'document' para 'doc'
             </div>
             <div class="detail-row">
                 <strong>Hash SHA-256:</strong>
-                <span><code style="font-size: 11px; word-break: break-all;">${doc.file_hash}</code></span>
+                <span><code style="font-size: 11px; word-break: break-all;">${escapeHtml(doc.file_hash)}</code></span>
             </div>
             <div class="detail-row">
                 <strong>Upload:</strong>
@@ -1189,9 +1189,9 @@ function showDocumentModal(doc) {  // ✅ Mudou de 'document' para 'doc'
                         <div class="audit-log-item">
                             <div class="log-icon">🔔</div>
                             <div class="log-info">
-                                <strong>${log.action}</strong>
-                                <p>${log.description || '-'}</p>
-                                <small>${formatDate(log.timestamp)}${log.ip_address ? ` • IP: ${log.ip_address}` : ''}</small>
+                                <strong>${escapeHtml(log.action)}</strong>
+                                <p>${escapeHtml(log.description || '-')}</p>
+                                <small>${formatDate(log.timestamp)}${log.ip_address ? ` • IP: ${escapeHtml(log.ip_address)}` : ''}</small>
                             </div>
                         </div>
                     `).join('')}
@@ -1266,10 +1266,10 @@ function renderUsers(users) {
     const rows = users.map(user => `
         <tr>
             <td>${user.id}</td>
-            <td>${user.name}</td>
-            <td>${user.email}</td>
+            <td>${escapeHtml(user.name)}</td>
+            <td>${escapeHtml(user.email)}</td>
             <td>
-                <span class="badge badge-${user.role}">${user.role.toUpperCase()}</span>
+                <span class="badge badge-${escapeHtml(user.role)}">${escapeHtml(user.role.toUpperCase())}</span>
             </td>
             <td>
                 <span class="badge ${user.is_active ? 'badge-success' : 'badge-danger'}">

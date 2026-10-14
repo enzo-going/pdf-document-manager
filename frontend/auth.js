@@ -225,6 +225,18 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
+// Texto vindo da API (título, autor, nome de arquivo...) entra no HTML montado
+// com template string: sem escapar, um título com <img onerror=...> rodaria no
+// navegador de quem abrisse a lista, com acesso ao token no localStorage.
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // ========== INICIALIZAÇÃO ==========
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -316,10 +328,10 @@ function updateUserInfo() {
 
     if (user && userInfoDiv) {
         userInfoDiv.innerHTML = `
-            <div class="user-avatar">${user.name.charAt(0).toUpperCase()}</div>
+            <div class="user-avatar">${escapeHtml(user.name.charAt(0).toUpperCase())}</div>
             <div class="user-details">
-                <div class="user-name">${user.name}</div>
-                <div class="user-role">${user.role.toUpperCase()}</div>
+                <div class="user-name">${escapeHtml(user.name)}</div>
+                <div class="user-role">${escapeHtml(user.role.toUpperCase())}</div>
             </div>
         `;
 
