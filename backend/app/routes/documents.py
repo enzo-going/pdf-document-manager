@@ -16,7 +16,7 @@ from app.extensions import db
 from app.models import Document, AuditLog
 from app.services.pdf_service import PDFService
 from app.utils.helpers import allowed_file
-from app.utils.decorators import admin_required, user_required
+from app.utils.decorators import user_required
 
 documents_bp = Blueprint('documents', __name__)
 
@@ -192,7 +192,6 @@ def upload_documents():
 @jwt_required()
 def list_documents():
     """Lista documentos com filtros e paginação"""
-    current_user_id = get_jwt_identity()
     query = Document.query
     
     # Filtros
@@ -324,7 +323,7 @@ def download_document(doc_id):
         document_id=document.id,
         user_id=user_id_int,
         action='download',
-        description=f'Download do arquivo',
+        description='Download do arquivo',
         ip_address=request.remote_addr,
         user_agent=request.headers.get('User-Agent', '')[:500] if request.headers.get('User-Agent') else None
     )

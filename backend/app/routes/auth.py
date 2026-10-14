@@ -5,10 +5,8 @@ Rotas de autenticação e gestão de usuários
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import (
     create_access_token,
-    create_refresh_token,
     jwt_required,
-    get_jwt_identity,
-    get_jwt
+    get_jwt_identity
 )
 from datetime import datetime
 from app.extensions import db
@@ -185,7 +183,7 @@ def create_user():
     try:
         role = UserRole[role_str]
     except KeyError:
-        return jsonify({'error': f'Role inválida. Use: admin, user ou viewer'}), 400
+        return jsonify({'error': 'Role inválida. Use: admin, user ou viewer'}), 400
     
     # Criar usuário
     new_user = User(

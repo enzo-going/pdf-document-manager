@@ -42,7 +42,7 @@ def create_app(config_name=None):
     # ✅ CORREÇÃO CRÍTICA: Importar modelos ANTES de create_all()
     with app.app_context():
         # Importar todos os modelos para que SQLAlchemy os registre
-        from app.models import User, Document, AuditLog
+        from app.models import User, Document, AuditLog  # noqa: F401 (registra as tabelas)
         
         try:
             # Agora o create_all() conhece os modelos

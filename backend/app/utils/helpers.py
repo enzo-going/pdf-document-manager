@@ -2,10 +2,8 @@
 Helpers e utilidades
 """
 
-import os
 import hashlib
 from datetime import datetime
-from flask import current_app
 
 
 def generate_identifier(prefix: str) -> str:

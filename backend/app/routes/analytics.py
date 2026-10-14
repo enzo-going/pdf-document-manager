@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, desc
 from app.extensions import db
 from app.models import Document, AuditLog, User
-from app.utils.decorators import admin_required
 
 analytics_bp = Blueprint('analytics', __name__)
 
@@ -118,7 +117,7 @@ def documents_timeline():
                     'count': count,
                     'day_name': date_obj.strftime('%a')  # 'Seg', 'Ter', etc
                 })
-            except Exception as e:
+            except Exception:
                 # Fallback: usar direto a string
                 chart_data.append({
                     'date': str(date_str),
