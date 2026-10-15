@@ -138,9 +138,9 @@
                 <header class="section-header">
                     <h1>📄 Gerenciar Documentos</h1>
                     <div class="header-actions">
-                        <input type="text" id="searchInput" placeholder="Buscar documentos..." 
+                        <input type="text" id="searchInput" aria-label="Buscar documentos" placeholder="Buscar documentos..." 
                                onkeyup="if(event.key==='Enter') loadDocuments(1)">
-                        <select id="typeFilter" onchange="loadDocuments(1)">
+                        <select id="typeFilter" onchange="loadDocuments(1)" aria-label="Filtrar por tipo de documento">
                             <option value="">Todos os tipos</option>
                             <option value="contrato">Contrato</option>
                             <option value="ata">Ata</option>
@@ -176,7 +176,7 @@
                         <thead>
                             <tr>
                                 <th width="40">
-                                    <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll()">
+                                    <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll()" aria-label="Selecionar todos os documentos da página">
                                 </th>
                                 <th width="60">ID</th>
                                 <th>Título / Arquivo</th>
