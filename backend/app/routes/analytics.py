@@ -2,12 +2,13 @@
 Rotas para analytics e dashboard
 """
 
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime, timedelta
 from sqlalchemy import func, desc
 from app.extensions import db
 from app.models import Document, AuditLog, User
+from app.utils.helpers import erro_interno
 
 analytics_bp = Blueprint('analytics', __name__)
 
@@ -77,14 +78,8 @@ def dashboard_summary():
             }
         }), 200
         
-    except Exception as e:
-        current_app.logger.error(f"Dashboard error: {str(e)}")
-        print(f"❌ Dashboard summary error: {e}")
-        return jsonify({
-            'success': False,
-            'message': 'Erro interno do servidor',
-            'error': str(e)
-        }), 500
+    except Exception:
+        return erro_interno('Erro ao montar o resumo do dashboard')
 
 
 @analytics_bp.route('/charts/documents-timeline', methods=['GET'])
@@ -134,14 +129,8 @@ def documents_timeline():
             }
         }), 200
         
-    except Exception as e:
-        print(f"❌ Timeline error: {e}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({
-            'success': False,
-            'message': str(e)
-        }), 500
+    except Exception:
+        return erro_interno('Erro ao montar a linha do tempo de documentos')
 
 
 @analytics_bp.route('/charts/documents-by-type', methods=['GET'])
@@ -170,12 +159,8 @@ def documents_by_type():
             }
         }), 200
         
-    except Exception as e:
-        print(f"❌ Type chart error: {e}")
-        return jsonify({
-            'success': False,
-            'message': str(e)
-        }), 500
+    except Exception:
+        return erro_interno('Erro ao montar o gráfico por tipo')
 
 
 @analytics_bp.route('/charts/signature-status', methods=['GET'])
@@ -196,12 +181,8 @@ def signature_status():
             }
         }), 200
         
-    except Exception as e:
-        print(f"❌ Signature status error: {e}")
-        return jsonify({
-            'success': False,
-            'message': str(e)
-        }), 500
+    except Exception:
+        return erro_interno('Erro ao montar o gráfico de assinaturas')
 
 
 @analytics_bp.route('/reports/export', methods=['GET'])
@@ -252,9 +233,5 @@ def export_report():
             }
         }), 200
         
-    except Exception as e:
-        print(f"❌ Export report error: {e}")
-        return jsonify({
-            'success': False,
-            'message': str(e)
-        }), 500
+    except Exception:
+        return erro_interno('Erro ao exportar o relatório')
