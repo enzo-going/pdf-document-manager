@@ -40,8 +40,10 @@ class PDFService:
             
             return True, "PDF válido"
             
-        except Exception as e:
-            return False, f"Erro ao validar PDF: {str(e)}"
+        except Exception:
+            # O texto da exceção do pypdf vai para o log; quem enviou recebe só o motivo.
+            current_app.logger.exception('PDF recusado na validação: %s', os.path.basename(file_path))
+            return False, "PDF inválido ou corrompido"
     
     def calculate_hash(self, file_path: str) -> str:
         """Calcula hash SHA256 do arquivo"""
@@ -88,8 +90,9 @@ class PDFService:
                     'modification_date': metadata.get('/ModDate', ''),
                     'pages': len(reader.pages)
                 }
-        except Exception as e:
-            return {'error': str(e)}
+        except Exception:
+            current_app.logger.exception('Falha ao ler os metadados do PDF')
+            return {'error': 'Não foi possível ler os metadados do PDF'}
     
     def add_metadata(self, input_path: str, metadata: dict, output_path: str) -> Tuple[bool, str]:
         """Adiciona metadados ao PDF"""
