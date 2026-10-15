@@ -15,7 +15,7 @@ from datetime import datetime
 from app.extensions import db
 from app.models import Document, AuditLog
 from app.services.pdf_service import PDFService
-from app.utils.helpers import allowed_file
+from app.utils.helpers import allowed_file, erro_interno
 from app.utils.decorators import user_required
 
 documents_bp = Blueprint('documents', __name__)
@@ -169,14 +169,15 @@ def upload_documents():
                 'pages': page_count
             })
             
-        except Exception as e:
+        except Exception:
             db.session.rollback()
             if os.path.exists(filepath):
                 os.remove(filepath)
+            current_app.logger.exception('Falha ao processar upload')
             results.append({
                 'filename': getattr(file, 'filename', 'unknown'),
                 'success': False,
-                'error': str(e)
+                'error': 'Não foi possível processar este arquivo'
             })
     
     success_count = len([r for r in results if r.get('success')])
@@ -294,12 +295,9 @@ def add_metadata(doc_id):
             'data': document.to_dict()
         }), 200
         
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        return jsonify({
-            'success': False,
-            'message': f'Erro interno: {str(e)}'
-        }), 500
+        return erro_interno('Erro ao salvar os metadados')
 
 
 @documents_bp.route('/<int:doc_id>/download', methods=['GET'])
@@ -373,12 +371,9 @@ def delete_document(doc_id):
             'message': 'Documento deletado com sucesso'
         }), 200
         
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        return jsonify({
-            'success': False,
-            'message': f'Erro ao deletar: {str(e)}'
-        }), 500
+        return erro_interno('Erro ao deletar o documento')
 
 
 @documents_bp.route('/delete_many', methods=['POST'])
@@ -434,8 +429,9 @@ def delete_many_documents():
                 db.session.delete(document)
                 deleted_count += 1
                 
-            except Exception as e:
-                errors.append({'id': doc_id, 'error': str(e)})
+            except Exception:
+                current_app.logger.exception('Falha ao deletar o documento %s', doc_id)
+                errors.append({'id': doc_id, 'error': 'Não foi possível deletar este documento'})
                 continue
         
         db.session.commit()
@@ -447,12 +443,9 @@ def delete_many_documents():
             'errors': errors
         }), 200
         
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        return jsonify({
-            'success': False,
-            'message': f'Erro ao deletar documentos: {str(e)}'
-        }), 500
+        return erro_interno('Erro ao deletar os documentos')
 
 
 @documents_bp.route('/batch/metadata', methods=['POST'])

@@ -84,7 +84,7 @@ class BatchProcessor:
                     self._update_task_result(task_id, {
                         'success': 0,
                         'failed': task.get('total', 0),
-                        'error': str(e),
+                        'error': 'Falha no processamento do lote',
                         'results': []
                     })
                     self._update_task_status(task_id, 'failed')
@@ -202,7 +202,7 @@ class BatchProcessor:
                 results.append({
                     'document_id': doc_id,
                     'success': False,
-                    'error': str(e)
+                    'error': 'Não foi possível atualizar este documento'
                 })
         
         success_count = len([r for r in results if r.get('success')])

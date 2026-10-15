@@ -11,6 +11,7 @@ from flask_jwt_extended import (
 from datetime import datetime
 from app.extensions import db
 from app.models import User, UserRole, AuditLog
+from app.utils.helpers import erro_interno
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -98,11 +99,8 @@ def get_current_user():
         
         return jsonify(user.to_dict()), 200
         
-    except Exception as e:
-        return jsonify({
-            'error': str(e),
-            'type': type(e).__name__
-        }), 500
+    except Exception:
+        return erro_interno('Erro ao carregar o usuário', chave='error')
 
 
 @auth_bp.route('/logout', methods=['POST'])
