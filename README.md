@@ -113,16 +113,21 @@ cd backend
 pytest -v
 ```
 
-18 testes, cobrindo o módulo de autenticação:
+O que a suíte cobre:
 
-- Login: sucesso, email inexistente, senha errada, campos faltando, conta desativada
-- `GET /api/auth/me` com token válido, sem token e com token inválido
-- Gestão de usuários: criação por admin, bloqueio para usuário comum, email
-  duplicado, listagem e controle de papéis
-- Renovação de token (e recusa de access token na rota de refresh), logout
-- Troca de senha: sucesso (senha antiga deixa de valer) e senha atual errada
+- **Autenticação** (`test_auth.py`): login (sucesso, email inexistente, senha
+  errada, campos faltando, conta desativada), `GET /api/auth/me` com e sem token,
+  gestão de usuários e papéis, renovação de token (recusando access token na rota
+  de refresh), logout e troca de senha
+- **Configuração** (`test_config.py`): produção recusa segredo e senha de admin de
+  exemplo, ambiente desconhecido falha em vez de cair em desenvolvimento,
+  `CORS_ORIGINS`, `/debug/routes` só em debug, endereço, porta e depurador do `run.py`
+- **Permissões** (`test_decorators.py`): erro dentro da rota não vira erro de
+  autorização, usuário comum continua barrado
+- **Lote de metadados** (`test_batch.py`): a auditoria registra valor anterior e novo
+- **Erros internos** (`test_erros.py`): a exceção vai para o log, não para a resposta
 
-Documentos, metadados e analytics ainda **não** têm testes automatizados.
+Upload, listagem e download de documentos ainda **não** têm testes automatizados.
 
 Em `backend/scripts/` ficam dois diagnósticos manuais (imports/rotas e JWT), que
 o pytest não coleta — veja [`backend/scripts/README.md`](backend/scripts/README.md).
