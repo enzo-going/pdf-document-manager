@@ -177,7 +177,7 @@
   --color-background: var(--color-charcoal-700);
   --color-surface: var(--color-charcoal-800);
   --color-text: var(--color-gray-200);
-  --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
+  --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.85);
   --color-primary: var(--color-teal-300);
   --color-primary-hover: var(--color-teal-400);
   --color-primary-active: var(--color-teal-800);
@@ -445,7 +445,7 @@ pre {
     --color-background: var(--color-charcoal-700);
     --color-surface: var(--color-charcoal-800);
     --color-text: var(--color-gray-200);
-    --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
+    --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.85);
     --color-primary: var(--color-teal-300);
     --color-primary-hover: var(--color-teal-400);
     --color-primary-active: var(--color-teal-800);
@@ -488,7 +488,7 @@ pre {
   --color-background: var(--color-charcoal-700);
   --color-surface: var(--color-charcoal-800);
   --color-text: var(--color-gray-200);
-  --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
+  --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.85);
   --color-primary: var(--color-teal-300);
   --color-primary-hover: var(--color-teal-400);
   --color-primary-active: var(--color-teal-800);
@@ -3578,7 +3578,8 @@ button:disabled {
 
 .user-role {
     font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
+    /* Sobre o cartão do usuário (mais claro), o secundário não chega a 4,5:1. */
+    color: var(--color-gray-300);
     text-transform: uppercase;
 }
 
