@@ -45,7 +45,7 @@ adição de metadados e painel de analytics.
 Todas as configurações sensíveis são lidas de variáveis de ambiente. Nenhum
 valor real é versionado — use o arquivo de exemplo como base:
 
-```bash
+```powershell
 cd backend
 python -m venv venv
 # Windows
@@ -79,8 +79,10 @@ Com `FLASK_ENV=production` a aplicação **se recusa a subir** se `SECRET_KEY`,
 `JWT_SECRET_KEY` ou `ADMIN_PASSWORD` ainda estiverem com um valor de exemplo
 (`change-me` e os padrões do código): esses valores estão publicados e permitem
 forjar o token de qualquer usuário. Em produção, `/debug/routes` também não existe.
-Se restringir o `CORS_ORIGINS`, sirva o `frontend/` por HTTP: aberto direto do
-disco, o navegador manda a origem `null`.
+O `.env.example` já restringe o `CORS_ORIGINS` a `http://localhost:3000` e
+`http://127.0.0.1:5500`, então a interface precisa ser servida por HTTP (veja
+[Execução](#execução)): aberta direto do disco, o navegador manda a origem `null`
+e a API recusa as chamadas.
 
 ## Execução
 
@@ -89,8 +91,15 @@ cd backend
 python run.py
 ```
 
-A API sobe em `http://localhost:5000`. Abra `frontend/index.html` no navegador
-(ou sirva a pasta `frontend/` com um servidor estático) para usar a interface.
+A API sobe em `http://localhost:5000`. Em outro terminal, na raiz do
+repositório, sirva a interface na porta que o `.env.example` libera:
+
+```bash
+python -m http.server 5500 --bind 127.0.0.1 --directory frontend
+```
+
+e abra <http://127.0.0.1:5500>. Abrir o `frontend/index.html` direto do disco não
+funciona com o `CORS_ORIGINS` do exemplo (origem `null`).
 
 O `run.py` escuta só nesta máquina (`127.0.0.1`). Para abrir na rede, defina
 `HOST=0.0.0.0`; nesse caso o depurador do Werkzeug fica desligado mesmo com
