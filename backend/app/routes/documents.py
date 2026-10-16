@@ -30,6 +30,22 @@ def handle_file_too_large(e):
     }), 413
 
 
+def _remover_arquivo(caminho):
+    """Apaga o PDF do disco depois que o banco já confirmou a exclusão.
+
+    Na ordem inversa, uma falha no commit desfazia a exclusão no banco, mas o
+    arquivo já tinha sumido: o documento voltava apontando para o nada. Falhar
+    aqui (arquivo aberto por outro processo no Windows, por exemplo) só deixa um
+    arquivo órfão na pasta, registrado no log.
+    """
+    if not caminho or not os.path.exists(caminho):
+        return
+    try:
+        os.remove(caminho)
+    except OSError:
+        current_app.logger.exception('Documento excluído, mas o arquivo ficou no disco: %s', caminho)
+
+
 def formatFileSize(bytes_size):
     """Formata bytes em formato legível"""
     for unit in ['B', 'KB', 'MB', 'GB']:
@@ -360,15 +376,13 @@ def delete_document(doc_id):
         )
         db.session.add(audit)
         db.session.flush()
-        
-        # Remover arquivo físico
-        if document.file_path and os.path.exists(document.file_path):
-            os.remove(document.file_path)
-        
-        # Deletar do banco
+
+        # Deletar do banco; o arquivo físico só sai depois do commit
+        caminho = document.file_path
         db.session.delete(document)
         db.session.commit()
-        
+        _remover_arquivo(caminho)
+
         return jsonify({
             'success': True,
             'message': 'Documento deletado com sucesso'
@@ -404,7 +418,8 @@ def delete_many_documents():
     
     deleted_count = 0
     errors = []
-    
+    caminhos = []
+
     try:
         for doc_id in document_ids:
             try:
@@ -424,11 +439,9 @@ def delete_many_documents():
                 )
                 db.session.add(audit)
                 db.session.flush()
-                
-                # Remover arquivo
-                if document.file_path and os.path.exists(document.file_path):
-                    os.remove(document.file_path)
-                
+
+                # Arquivo é removido depois do commit, junto com os outros
+                caminhos.append(document.file_path)
                 db.session.delete(document)
                 deleted_count += 1
                 
@@ -436,9 +449,11 @@ def delete_many_documents():
                 current_app.logger.exception('Falha ao deletar o documento %s', doc_id)
                 errors.append({'id': doc_id, 'error': 'Não foi possível deletar este documento'})
                 continue
-        
+
         db.session.commit()
-        
+        for caminho in caminhos:
+            _remover_arquivo(caminho)
+
         return jsonify({
             'success': True,
             'message': f'{deleted_count} de {len(document_ids)} documentos deletados',
