@@ -181,3 +181,20 @@ def test_exclusao_em_lote_apaga_arquivos_e_mantem_a_auditoria(cliente, auth):
     assert Document.query.count() == 0
     assert not any(os.path.exists(c) for c in caminhos)
     assert AuditLog.query.filter_by(action='document_deleted').count() == 2
+
+
+def test_falha_no_banco_ao_excluir_nao_apaga_o_arquivo(cliente, auth, monkeypatch):
+    doc_id = _enviar(cliente, auth, ('manter.pdf', _pdf())).get_json()['data'][0]['document_id']
+    caminho = db.session.get(Document, doc_id).file_path
+
+    def commit_que_falha():
+        raise RuntimeError('banco indisponivel')
+
+    monkeypatch.setattr(db.session, 'commit', commit_que_falha)
+    resp = cliente.delete(f'/api/documents/{doc_id}', headers=auth)
+    monkeypatch.undo()
+
+    # O banco desfez a exclusão; o arquivo tem de continuar lá para o documento abrir.
+    assert resp.status_code == 500
+    assert db.session.get(Document, doc_id) is not None
+    assert os.path.exists(caminho)
