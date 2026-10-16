@@ -102,6 +102,18 @@ def test_upload_recusa_duplicata_pelo_conteudo(cliente, auth, tmp_path):
     assert len(os.listdir(tmp_path)) == 1
 
 
+def test_mesmo_nome_no_mesmo_envio_nao_sobrescreve_o_outro_arquivo(cliente, auth):
+    # Dois PDFs diferentes chamados "scan.pdf" (de pastas diferentes) no mesmo
+    # upload: cada documento tem de baixar o próprio conteúdo.
+    um, outro = _pdf(marca='um'), _pdf(marca='outro')
+    resp = _enviar(cliente, auth, ('scan.pdf', um), ('scan.pdf', outro))
+
+    ids = [r['document_id'] for r in resp.get_json()['data']]
+    assert len(ids) == 2
+    baixados = [cliente.get(f'/api/documents/{i}/download', headers=auth).data for i in ids]
+    assert baixados == [um, outro]
+
+
 def test_listagem_filtra_por_busca_e_tipo(cliente, auth):
     resp = _enviar(cliente, auth, ('contrato aluguel.pdf', _pdf(marca='1')), ('ata reuniao.pdf', _pdf(marca='2')))
     contrato_id = resp.get_json()['data'][0]['document_id']
