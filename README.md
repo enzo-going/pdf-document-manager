@@ -119,6 +119,10 @@ O que a suíte cobre:
   errada, campos faltando, conta desativada), `GET /api/auth/me` com e sem token,
   gestão de usuários e papéis, renovação de token (recusando access token na rota
   de refresh), logout e troca de senha
+- **Documentos** (`test_documents.py`): upload (título, páginas, recusa de
+  extensão, de PDF inválido e de duplicata, arquivos de mesmo nome no mesmo
+  envio), busca e filtro por tipo, metadados, download e exclusão simples e em
+  lote. A exclusão mantém a auditoria e só apaga o arquivo depois do commit
 - **Configuração** (`test_config.py`): produção recusa segredo e senha de admin de
   exemplo, ambiente desconhecido falha em vez de cair em desenvolvimento,
   `CORS_ORIGINS`, `/debug/routes` só em debug, endereço, porta e depurador do `run.py`
@@ -127,7 +131,7 @@ O que a suíte cobre:
 - **Lote de metadados** (`test_batch.py`): a auditoria registra valor anterior e novo
 - **Erros internos** (`test_erros.py`): a exceção vai para o log, não para a resposta
 
-Upload, listagem e download de documentos ainda **não** têm testes automatizados.
+O painel de analytics só tem teste do caminho de erro.
 
 Em `backend/scripts/` ficam dois diagnósticos manuais (imports/rotas e JWT), que
 o pytest não coleta — veja [`backend/scripts/README.md`](backend/scripts/README.md).
