@@ -150,3 +150,34 @@ def test_download_devolve_o_arquivo_e_registra(cliente, auth):
     assert resp.data == conteudo
     assert 'receita.pdf' in resp.headers['Content-Disposition']
     assert AuditLog.query.filter_by(document_id=doc_id, action='download').count() == 1
+
+
+def test_exclusao_apaga_o_arquivo_e_mantem_a_auditoria(cliente, auth):
+    doc_id = _enviar(cliente, auth, ('apagar.pdf', _pdf())).get_json()['data'][0]['document_id']
+    caminho = db.session.get(Document, doc_id).file_path
+
+    resp = cliente.delete(f'/api/documents/{doc_id}', headers=auth)
+
+    assert resp.status_code == 200
+    assert db.session.get(Document, doc_id) is None
+    assert not os.path.exists(caminho)
+    # O registro de quem apagou (e o histórico do documento) sobrevive à exclusão,
+    # agora sem apontar para o documento que não existe mais.
+    logs = AuditLog.query.filter(AuditLog.description.contains('apagar')).all()
+    assert {log.action for log in logs} == {'upload', 'document_deleted'}
+    assert all(log.document_id is None for log in logs)
+
+
+def test_exclusao_em_lote_apaga_arquivos_e_mantem_a_auditoria(cliente, auth):
+    resp = _enviar(cliente, auth, ('lote1.pdf', _pdf(marca='1')), ('lote2.pdf', _pdf(marca='2')))
+    ids = [r['document_id'] for r in resp.get_json()['data']]
+    caminhos = [db.session.get(Document, i).file_path for i in ids]
+
+    resp = cliente.post('/api/documents/delete_many', headers=auth, json={'document_ids': ids + [999]})
+
+    corpo = resp.get_json()
+    assert corpo['deleted'] == 2
+    assert corpo['errors'] == [{'id': 999, 'error': 'Documento não encontrado'}]
+    assert Document.query.count() == 0
+    assert not any(os.path.exists(c) for c in caminhos)
+    assert AuditLog.query.filter_by(action='document_deleted').count() == 2

@@ -99,10 +99,12 @@ class Document(db.Model):
     uploader = db.relationship('User', back_populates='documents')
     
     # ✅ CORREÇÃO: Mudar lazy=True para lazy='dynamic'
-    audit_logs = db.relationship('AuditLog', 
-                                  back_populates='document', 
-                                  lazy='dynamic',  # ✅ MUDOU AQUI
-                                  cascade='all, delete-orphan')
+    # Sem cascade de exclusão: apagar o documento deixa os logs dele com
+    # document_id nulo em vez de apagá-los. Com 'delete-orphan' o histórico
+    # inteiro sumia, inclusive o registro de quem fez a exclusão.
+    audit_logs = db.relationship('AuditLog',
+                                  back_populates='document',
+                                  lazy='dynamic')  # ✅ MUDOU AQUI
     
     def to_dict(self):
         return {
