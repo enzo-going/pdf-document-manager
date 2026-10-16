@@ -51,6 +51,18 @@ def cenario():
         db.drop_all()
 
 
+def test_resumo_funciona_para_usuario_comum_e_mostra_so_os_documentos_dele(cenario):
+    cliente, tokens = cenario
+
+    resp = cliente.get('/api/analytics/dashboard/summary', headers=tokens['ana'])
+
+    assert resp.status_code == 200
+    dados = resp.get_json()['data']
+    assert sorted(d['title'] for d in dados['recent_documents']) == ['ana-ata.pdf', 'ana-contrato.pdf']
+    assert dados['totals']['documents'] == 3
+    assert dados['totals']['active_users'] is None
+
+
 def test_resumo_do_admin_traz_todos_e_a_contagem_de_usuarios(cenario):
     cliente, tokens = cenario
 

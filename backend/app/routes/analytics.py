@@ -41,12 +41,16 @@ def dashboard_summary():
             Document.uploaded_at >= month_ago
         ).count()
         
-        # Documentos recentes
-        recent_query = Document.query.order_by(desc(Document.uploaded_at)).limit(5)
-        
+        # Documentos recentes. O filtro do usuário comum vem antes do limit: o
+        # SQLAlchemy recusa filter() depois de LIMIT, e o resumo respondia 500
+        # para todo usuário que não era admin.
+        recent_query = Document.query
+
         if user and not user.has_permission('manage_users'):
             recent_query = recent_query.filter_by(uploaded_by=int(current_user_id))
-        
+
+        recent_query = recent_query.order_by(desc(Document.uploaded_at)).limit(5)
+
         recent_docs = [{
             'id': doc.id,
             'title': doc.title or doc.original_filename,
