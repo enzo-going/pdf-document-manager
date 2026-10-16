@@ -129,9 +129,10 @@ O que a suíte cobre:
 - **Permissões** (`test_decorators.py`): erro dentro da rota não vira erro de
   autorização, usuário comum continua barrado
 - **Lote de metadados** (`test_batch.py`): a auditoria registra valor anterior e novo
+- **Analytics** (`test_analytics.py`): resumo do dashboard para usuário comum e
+  admin, gráficos por tipo, por assinatura e linha do tempo, exportação filtrada
+  pelo dono dos documentos
 - **Erros internos** (`test_erros.py`): a exceção vai para o log, não para a resposta
-
-O painel de analytics só tem teste do caminho de erro.
 
 Em `backend/scripts/` ficam dois diagnósticos manuais (imports/rotas e JWT), que
 o pytest não coleta — veja [`backend/scripts/README.md`](backend/scripts/README.md).
