@@ -94,7 +94,10 @@ def upload_documents():
         try:
             filename = secure_filename(file.filename)
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            unique_filename = f"{timestamp}_{filename}"
+            # Só o horário não bastava: dois PDFs com o mesmo nome no mesmo
+            # segundo (o mesmo envio, por exemplo) caíam no mesmo arquivo e o
+            # segundo sobrescrevia o primeiro.
+            unique_filename = f"{timestamp}_{uuid.uuid4().hex[:8]}_{filename}"
             filepath = os.path.join(upload_folder, unique_filename)
             
             # Salvar arquivo
